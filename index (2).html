@@ -289,7 +289,186 @@
     border-bottom:1px solid var(--ink-faint); padding-bottom:3px; transition:.25s;
   }
   .project-links a:hover{ border-color:var(--violet); color:var(--violet); }
+  
+  /* ---------- GitHub all projects ---------- */
 
+.view-all-projects-wrap{
+  display:flex;
+  justify-content:center;
+  margin-top:50px;
+}
+
+.view-all-projects-btn{
+  border:1px solid var(--line);
+  background:var(--glass);
+  color:var(--ink);
+  padding:12px 22px;
+  border-radius:100px;
+  font-size:14px;
+  font-weight:500;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition:all .25s ease;
+}
+
+.view-all-projects-btn:hover{
+  border-color:var(--violet);
+  background:rgba(139,108,246,0.08);
+  transform:translateY(-2px);
+}
+
+.view-all-projects-btn .arrow{
+  transition:transform .25s ease;
+}
+
+.view-all-projects-btn.active .arrow{
+  transform:rotate(180deg);
+}
+
+.github-projects-wrap{
+  display:none;
+  margin-top:70px;
+}
+
+.github-projects-wrap.show{
+  display:block;
+}
+
+.github-project-status{
+  text-align:center;
+  color:var(--ink-dim);
+  font-size:14px;
+  padding:40px 0;
+}
+
+.github-project-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.github-project-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  min-height:260px;
+  transition:transform .25s ease, border-color .25s ease, background .25s ease;
+}
+
+.github-project-card:hover{
+  transform:translateY(-5px);
+  border-color:rgba(139,108,246,0.45);
+  background:var(--surface-2);
+}
+
+.github-project-number{
+  font-family:'JetBrains Mono', monospace;
+  color:var(--violet);
+  font-size:12px;
+  margin-bottom:18px;
+}
+
+.github-project-card h3{
+  font-size:21px;
+  margin-bottom:12px;
+  line-height:1.25;
+}
+
+.github-project-card p{
+  color:var(--ink-dim);
+  font-size:14px;
+  line-height:1.7;
+  font-weight:300;
+  margin-bottom:20px;
+}
+
+.github-project-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:auto;
+  margin-bottom:22px;
+}
+
+.github-project-meta span{
+  font-size:11px;
+  color:var(--ink-faint);
+  border:1px solid var(--line);
+  padding:5px 10px;
+  border-radius:100px;
+}
+
+.github-project-link{
+  color:var(--ink);
+  font-size:13px;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  width:max-content;
+  border-bottom:1px solid var(--ink-faint);
+  padding-bottom:3px;
+  transition:.25s;
+}
+
+.github-project-link:hover{
+  color:var(--violet);
+  border-color:var(--violet);
+}
+
+@media(max-width:900px){
+  .github-project-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:600px){
+  .github-project-grid{
+    grid-template-columns:1fr;
+  }
+
+  .github-project-card{
+    padding:24px;
+  }
+}
+
+.github-project-image{
+  width:100%;
+  height:200px;
+  object-fit:cover;
+  border-radius:14px;
+  margin-bottom:22px;
+  display:block;
+  background:var(--surface-2);
+}
+
+.github-project-card{
+  overflow:hidden;
+}
+
+.github-project-image-wrap{
+  width:100%;
+  overflow:hidden;
+  border-radius:14px;
+  margin-bottom:22px;
+}
+
+.github-project-image-wrap img{
+  width:100%;
+  height:200px;
+  object-fit:cover;
+  display:block;
+  transition:transform .4s ease;
+}
+
+.github-project-card:hover .github-project-image-wrap img{
+  transform:scale(1.04);
+}
   /* ---------- achievements ---------- */
   .ach-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin-top:70px; background:var(--line); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
   @media(max-width:800px){ .ach-grid{ grid-template-columns:1fr; } }
@@ -518,6 +697,31 @@
         <div class="project-stack"><span>SOLIDWORKS</span><span>3D CAD</span><span>Mechanical Design</span><span>Assembly Design</span><span>Parametric Modeling</span><span>Product Design</span></div>
       </div>
     </div>
+
+    <!-- VIEW ALL PROJECTS BUTTON -->
+  <div class="view-all-projects-wrap">
+    <button id="viewAllProjectsBtn" class="view-all-projects-btn magnetic">
+      View All Projects
+      <span class="arrow">↓</span>
+    </button>
+  </div>
+
+  <!-- ALL GITHUB PROJECTS -->
+  <div id="githubProjectsWrap" class="github-projects-wrap">
+    <div class="section-head">
+      <div class="eyebrow">GitHub / Portfolio Projects</div>
+      <h2>All selected projects.</h2>
+      <p>
+        Projects marked as portfolio projects on GitHub are displayed here automatically.
+      </p>
+    </div>
+
+    <div id="githubProjectStatus" class="github-project-status">
+      Loading projects...
+    </div>
+
+    <div id="githubProjectGrid" class="github-project-grid"></div>
+  </div>
   </div>
 </section>
 
@@ -573,6 +777,214 @@
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
+/* ---------- GitHub portfolio projects ---------- */
+
+const GITHUB_USERNAME = "karthikveer1234-netizen";
+const GITHUB_TOPIC = "portfolio-project";
+
+const viewAllProjectsBtn =
+  document.getElementById("viewAllProjectsBtn");
+
+const githubProjectsWrap =
+  document.getElementById("githubProjectsWrap");
+
+const githubProjectGrid =
+  document.getElementById("githubProjectGrid");
+
+const githubProjectStatus =
+  document.getElementById("githubProjectStatus");
+
+let githubProjectsLoaded = false;
+
+viewAllProjectsBtn.addEventListener("click", async function(){
+
+  const isOpen = githubProjectsWrap.classList.contains("show");
+
+  if(isOpen){
+
+    githubProjectsWrap.classList.remove("show");
+    viewAllProjectsBtn.classList.remove("active");
+
+    viewAllProjectsBtn.innerHTML =
+      'View All Projects <span class="arrow">↓</span>';
+
+    return;
+  }
+
+  githubProjectsWrap.classList.add("show");
+  viewAllProjectsBtn.classList.add("active");
+
+  viewAllProjectsBtn.innerHTML =
+    'Hide All Projects <span class="arrow">↑</span>';
+
+  if(!githubProjectsLoaded){
+    await loadGithubProjects();
+  }
+
+});
+
+
+async function loadGithubProjects(){
+
+  githubProjectStatus.style.display = "block";
+  githubProjectStatus.textContent = "Loading projects...";
+
+  try{
+
+    const apiUrl =
+      `https://api.github.com/search/repositories` +
+      `?q=user:${GITHUB_USERNAME}+topic:${GITHUB_TOPIC}` +
+      `&sort=updated` +
+      `&order=desc` +
+      `&per_page=100`;
+
+    const response = await fetch(apiUrl, {
+      headers:{
+        "Accept":"application/vnd.github+json"
+      }
+    });
+
+    if(!response.ok){
+      throw new Error("GitHub API request failed");
+    }
+
+    const data = await response.json();
+
+    const projects = data.items || [];
+
+    githubProjectGrid.innerHTML = "";
+
+    if(projects.length === 0){
+
+      githubProjectStatus.textContent =
+        "No portfolio projects found yet.";
+
+      return;
+    }
+
+    githubProjectStatus.style.display = "none";
+
+    projects.forEach((repo, index) => {
+
+      const card = document.createElement("article");
+
+      card.className = "github-project-card reveal";
+
+      const description =
+        repo.description ||
+        "A project by Pagadala Karthik Veer.";
+
+      const language =
+        repo.language ||
+        "CAD / Engineering";
+
+      const updatedDate =
+        new Date(repo.updated_at).toLocaleDateString(
+          "en-IN",
+          {
+            day:"numeric",
+            month:"short",
+            year:"numeric"
+          }
+        );
+
+      const imageUrl =
+  `https://raw.githubusercontent.com/` +
+  `${GITHUB_USERNAME}/${repo.name}/main/portfolio-image.jpeg`;
+
+card.innerHTML = `
+
+  <div class="github-project-image-wrap">
+    <img
+      src="${imageUrl}"
+      alt="${escapeHtml(repo.name)}"
+      loading="lazy"
+      onerror="this.parentElement.style.display='none';"
+    >
+  </div>
+
+  <span class="github-project-number">
+    ${String(index + 1).padStart(2,"0")} — GitHub Project
+  </span>
+
+  <h3>${escapeHtml(repo.name)}</h3>
+
+  <p>
+    ${escapeHtml(description)}
+  </p>
+
+  <div class="github-project-meta">
+
+    <span>${escapeHtml(language)}</span>
+
+    <span>
+      Updated ${updatedDate}
+    </span>
+
+  </div>
+
+  <a
+    href="${repo.html_url}"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="github-project-link"
+  >
+    View on GitHub →
+  </a>
+
+`;
+
+  
+
+      githubProjectGrid.appendChild(card);
+
+    });
+
+    githubProjectsLoaded = true;
+
+    /* Animate newly loaded cards */
+    gsap.fromTo(
+      ".github-project-card",
+      {
+        opacity:0,
+        y:30
+      },
+      {
+        opacity:1,
+        y:0,
+        duration:0.6,
+        stagger:0.08,
+        ease:"power3.out"
+      }
+    );
+
+  }
+  catch(error){
+
+    console.error("GitHub Projects Error:", error);
+
+    githubProjectStatus.style.display = "block";
+
+    githubProjectStatus.innerHTML =
+      "Unable to load GitHub projects right now. " +
+      '<a href="https://github.com/karthikveer1234-netizen" target="_blank" rel="noopener noreferrer" style="color:var(--violet);">View GitHub directly →</a>';
+
+  }
+
+}
+
+
+/* Prevent GitHub descriptions from inserting HTML */
+function escapeHtml(text){
+
+  const div = document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+  
 /* cursor glow */
 const glow = document.getElementById('cursor-glow');
 let mx=window.innerWidth/2, my=window.innerHeight/2, gx=mx, gy=my;
